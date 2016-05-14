@@ -1,0 +1,6 @@
+Sources:
+
+http://docs.ggplot2.org/
+http://www.cookbook-r.com/
+http://stackoverflow.com/
+http://www.statmethods.net/

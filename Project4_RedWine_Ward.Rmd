@@ -38,7 +38,7 @@ ggplot(data = rwine, aes(x = quality)) +
 
 Quality appears to follow a rough normal distribution with a mean of 5.636.  It also appears that fractional scores were not allowed, making the data highly discrete.  No wine scored below a 3, nor above an 8.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 ##plotting histograms of all of the key variables side-by-side
 
@@ -71,147 +71,97 @@ grid.arrange(plot1, plot2, plot3, plot4, plot5, plot7, plot8, plot9,
 
 The distribution of most variables appears to follow a rough bell curve, though many of them show a strong positive skew away from zero.  The distribution of citric acid amounts is also interesting in that it appears to be slightly bimodal.
 
-I'll try increasing the number of bins and cutting off outliers to see if we can get any additional insight.
+I'll try cutting off the long tails of the residual sugar, chlorides, and sulphates graphs to get a better look.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=3}
 
 ##further refining the side-by-side histogram view
 
-plot1 <- ggplot(data = rwine, aes(x = fixed.acidity)) +
-  geom_histogram(bins = 100) +
-  xlim(4, quantile(rwine$fixed.acidity, 0.99))
-plot2 <- ggplot(data = rwine, aes(x = volatile.acidity)) +
-  geom_histogram(bins = 100) +
-  xlim(0.1, quantile(rwine$volatile.acidity, 0.99))
-plot3 <- ggplot(data = rwine, aes(x = citric.acid)) +
-  geom_histogram(bins = 100) +
-  xlim(0, quantile(rwine$citric.acid, 0.99))
 plot4 <- ggplot(data = rwine, aes(x = residual.sugar)) +
-  geom_histogram(bins = 100) +
-  xlim(1, quantile(rwine$residual.sugar, 0.99))
+  geom_histogram() +
+  xlim(1, quantile(rwine$residual.sugar, 0.95))
 plot5 <- ggplot(data = rwine, aes(x = chlorides)) +
-  geom_histogram(bins = 100) +
+  geom_histogram() +
   xlim(0.03, quantile(rwine$chlorides, 0.95))
-plot7 <- ggplot(data = rwine, aes(x = free.sulfur.dioxide)) +
-  geom_histogram(bins = 100) +
-  xlim(0, quantile(rwine$free.sulfur.dioxide, 0.99))
-plot8 <- ggplot(data = rwine, aes(x = total.sulfur.dioxide)) +
-  geom_histogram(bins = 100) +
-  xlim(0, quantile(rwine$total.sulfur.dioxide, 0.99))
-plot9 <- ggplot(data = rwine, aes(x = density)) +
-  geom_histogram(bins = 100) +
-  xlim(c(quantile(rwine$density, 0.01), quantile(rwine$density, 0.99)))
-plot10 <- ggplot(data = rwine, aes(x = pH)) +
-  geom_histogram(bins = 100) +
-  xlim(c(quantile(rwine$pH, 0.01), quantile(rwine$pH, 0.99)))
 plot11 <- ggplot(data = rwine, aes(x = sulphates)) +
-  geom_histogram(bins = 100) +
-  xlim(0.3, quantile(rwine$sulphates, 0.99))
-plot12 <- ggplot(data = rwine, aes(x = alcohol)) +
-  geom_histogram(bins = 100) +
-  xlim(8, quantile(rwine$alcohol, 0.99))
+  geom_histogram() +
+  xlim(0.3, quantile(rwine$sulphates, 0.95))
 
-grid.arrange(plot1, plot2, plot3, plot4, plot5, plot7, plot8, plot9, 
-             plot10, plot11, plot12, ncol = 3)
+grid.arrange(plot4, plot5, plot11, ncol = 3)
 ```
 
-By increasing the number of bins from 30 to 100, we can see that the data is actually much noisier than the original plots show.  You can also begin to see that many of the variables become discrete - likely we are seeing the limits of the precision of the measurement methods (i.e. the instruments only allowed them to get to the nearest whole number, the nearest tenth, nearest one hundredth, etc., or they rounded).
+By cutting off the upper 5% of each dataset, we can see the the remaining data is much closer to a normal distribution.  So these appear to be the ranges for the "typical" values, with a few upper outliers that create long tails for each distribution.  Now I'll try looking at these tails by applying a log base 10 scale along the x-axis
 
-The shape of the citric acid distribution becomes even more interesting, with pronounced peaks near 0, 0.25, and 0.5.  These are very round numbers - does this indicate a limitation in the measurement method?
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=3}
 
 ##moving to a log base 10 x scale to explore the tails of the histograms
 
-plot1 <- ggplot(data = rwine, aes(x = fixed.acidity)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot2 <- ggplot(data = rwine, aes(x = volatile.acidity)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot3 <- ggplot(data = rwine, aes(x = citric.acid)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
+
 plot4 <- ggplot(data = rwine, aes(x = residual.sugar)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   scale_x_log10()
 plot5 <- ggplot(data = rwine, aes(x = chlorides)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot7 <- ggplot(data = rwine, aes(x = free.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot8 <- ggplot(data = rwine, aes(x = total.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot9 <- ggplot(data = rwine, aes(x = density)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot10 <- ggplot(data = rwine, aes(x = pH)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   scale_x_log10()
 plot11 <- ggplot(data = rwine, aes(x = sulphates)) +
-  geom_histogram(bins = 50) +
-  scale_x_log10()
-plot12 <- ggplot(data = rwine, aes(x = alcohol)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   scale_x_log10()
 
-grid.arrange(plot1, plot2, plot3, plot4, plot5, plot7, plot8, plot9, 
-             plot10, plot11, plot12, ncol = 3)
+
+grid.arrange(plot4, plot5, plot11, ncol = 3)
 ```
 
-I transformed the graphs using log base 10 along the x axis to get a better look at the long tails of the distributions (using 50 bins this time).
+Not incredibly interesting.  The curves appear to be fairly normal with this transformation, with no other interesting behavior (bimodal, etc.).
 
-I wonder how strong the relationships are between these variables and the perceived quality of the wine.  To get a better sense for this, let's graph these variables for the best wines (quality of 7-8) vs. the sub-par wines (quality of 3-5).
+Switching gears, I wonder how strong the relationships are between these variables and the perceived quality of the wine.  To get a better sense for this, let's graph these variables for the best wines (quality of 7-8) vs. the sub-par wines (quality of 3-5).
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 ##the same (non-log) views, but only for the highest-quality wines
 
 plot1 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = fixed.acidity)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(4, quantile(rwine$fixed.acidity, 0.99))
 plot2 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = volatile.acidity)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.1, quantile(rwine$volatile.acidity, 0.99))
 plot3 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = citric.acid)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$citric.acid, 0.99))
 plot4 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = residual.sugar)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(1, quantile(rwine$residual.sugar, 0.99))
 plot5 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = chlorides)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.03, quantile(rwine$chlorides, 0.95))
 plot7 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = free.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$free.sulfur.dioxide, 0.99))
 plot8 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = total.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$total.sulfur.dioxide, 0.99))
 plot9 <- ggplot(data = subset(rwine, quality >= 7), 
                 aes(x = density)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(c(quantile(rwine$density, 0.01), quantile(rwine$density, 0.99)))
 plot10 <- ggplot(data = subset(rwine, quality >= 7), 
                  aes(x = pH)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(c(quantile(rwine$pH, 0.01), quantile(rwine$pH, 0.99)))
 plot11 <- ggplot(data = subset(rwine, quality >= 7), 
                  aes(x = sulphates)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.3, quantile(rwine$sulphates, 0.99))
 plot12 <- ggplot(data = subset(rwine, quality >= 7), 
                  aes(x = alcohol)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(8, quantile(rwine$alcohol, 0.99))
 
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot7, plot8, plot9, 
@@ -222,53 +172,53 @@ summary(subset(rwine, quality >= 7))
 
 Some of the distributions and means for the higher quality wines are significantly different.  For instance, the higher quality wines have citric acid that is 39% higher than the overall average, with volatile acidity and total sulfur dioxide that are 23% and 25% lower than the overall average, respectively.  Let's look at the sup-par wines.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 ##the same histogram views for the sub-par wines
 
 plot1 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = fixed.acidity)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(4, quantile(rwine$fixed.acidity, 0.99))
 plot2 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = volatile.acidity)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.1, quantile(rwine$volatile.acidity, 0.99))
 plot3 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = citric.acid)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$citric.acid, 0.99))
 plot4 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = residual.sugar)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(1, quantile(rwine$residual.sugar, 0.99))
 plot5 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = chlorides)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.03, quantile(rwine$chlorides, 0.95))
 plot7 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = free.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$free.sulfur.dioxide, 0.99))
 plot8 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = total.sulfur.dioxide)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0, quantile(rwine$total.sulfur.dioxide, 0.99))
 plot9 <- ggplot(data = subset(rwine, quality <= 5), 
                 aes(x = density)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(c(quantile(rwine$density, 0.01), quantile(rwine$density, 0.99)))
 plot10 <- ggplot(data = subset(rwine, quality <= 5), 
                  aes(x = pH)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(c(quantile(rwine$pH, 0.01), quantile(rwine$pH, 0.99)))
 plot11 <- ggplot(data = subset(rwine, quality <= 5), 
                  aes(x = sulphates)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.3, quantile(rwine$sulphates, 0.99))
 plot12 <- ggplot(data = subset(rwine, quality <= 5), 
                  aes(x = alcohol)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(8, quantile(rwine$alcohol, 0.99))
 
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot7, plot8, plot9, 
@@ -308,11 +258,11 @@ No, the variables appear to be fairly independent, so it did not make much sense
 Quality is a highly discrete variable, but there is no way to change this after the data has already been collected.  Citric acid also has a somewhat unusual distribution, but it doesn't seem particularly problematic for our analysis.
 
 # Bivariate Plots Section
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 #initial correlation matrix
 
-ggpairs(rwine, 
+ggpairs(rwine[ , 2:13], 
   lower = list(continuous = wrap("points", shape = I('.'))), 
   upper = list(combo = wrap("box", outlier.shape = I('.'))))
 
@@ -320,7 +270,7 @@ ggpairs(rwine,
 
 Looking at this correlation matrix, quality appears to be most influenced by volatile acidity, citric acid, total sulfur dioxide, density, sulphates, and alcohol.  Moving forward, I will focus on these variables.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 #creating a subset of the wine data to focus on the most meaninful variables
 
@@ -329,7 +279,7 @@ rwine2 <- rwine[, c(3, 4, 8, 9, 11, 12, 13)]
 
 Plotting a correlation matrix with the smaller, more focused, set of variables now.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 #2nd, more focused, correlation matrix
 
@@ -340,29 +290,35 @@ ggpairs(rwine2,
 
 Now plotting these variables vs. quality.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
-##plotting key variables vs. quality
+##plotting key variables vs. quality, with trend lines
 
 plot1 <- ggplot(data = rwine, aes(x = volatile.acidity, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 plot2 <- ggplot(data = rwine, aes(x = citric.acid, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 plot3 <- ggplot(data = rwine, aes(x = total.sulfur.dioxide, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 plot4 <- ggplot(data = rwine, aes(x = density, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 plot5 <- ggplot(data = rwine, aes(x = sulphates, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 plot6 <- ggplot(data = rwine, aes(x = alcohol, y = quality)) +
-  geom_point(alpha = 0.5, size = 3/4, position = 'jitter')
+  geom_point(alpha = 0.5, size = 3/4, position = 'jitter') +
+  geom_smooth(method = "lm", se = FALSE)
 
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2)
 ```
 
 The discrete nature of the quality scores makes this a bit tougher to interpret, but the correlations can still be plainly seen in the plots.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=15}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 
 ##creating new variables to "bucketize" key variables into quartiles
 ##for further visualization
@@ -383,22 +339,28 @@ rwine2$alcohol.bucket <- cut(rwine2$alcohol,
 ##creating plots of quality (x) vs. the key variables (color)
 
 plot1 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = volatile.acidity.bucket))
+  geom_density(aes(color = volatile.acidity.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 plot2 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = citric.acid.bucket))
+  geom_density(aes(color = citric.acid.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 plot3 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = total.sulfur.dioxide.bucket))
+  geom_density(aes(color = total.sulfur.dioxide.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 plot4 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = density.bucket))
+  geom_density(aes(color = density.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 plot5 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = sulphates.bucket))
+  geom_density(aes(color = sulphates.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 plot6 <- ggplot(aes(x = quality), data = rwine2) +
-  geom_density(aes(color = alcohol.bucket))
+  geom_density(aes(color = alcohol.bucket)) + 
+  scale_colour_brewer(palette = "YlOrRd")
 
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, ncol = 2)
 ```
 
-This helps us to visualize how likely manipulating each variable will have an impact on the quality of the wine.  For instance, you can see that there are much fewer high quality wines with lower alcohol content.
+"Bucketizing" these variables and plotting against quality helps us to visualize how likely manipulating each variable will have an impact on the quality of the wine.  For instance, you can see that there are much fewer high quality wines with lower alcohol content.
 
 # Bivariate Analysis
 
@@ -422,28 +384,28 @@ Quality is most highly correlated with alcohol content.
 
 Now let's create a view that combines the two variables that are most highly correlated with quality.  
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=10}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
 
 ##combining alcohol, quality, and volatile acidity in one graph
 
 ggplot(data = rwine2, aes(x = alcohol, y = quality, 
                           colour = volatile.acidity.bucket)) +
   geom_point(alpha = 0.7, size = 5, position = 'jitter') + 
-  scale_colour_brewer(palette = "Spectral")
+  scale_colour_brewer(palette = "YlOrRd")
 ```
 
 This graph clearly shows a clump of lower-quality wines with low alcohol and high volatile acidity.  It also shows that high quality wines generally have higher alcohol content and lower volatile acidity.
 
 Alternately, we could switch the alcohol and volatile acidity variables to see if this plot provides any additional insights.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=10}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
 
 ##switching axes
 
 ggplot(data = rwine2, aes(x = volatile.acidity, y = quality, 
                           colour = alcohol.bucket)) +
   geom_point(alpha = 0.7, size = 5, position = 'jitter') + 
-  scale_colour_brewer(palette = "Spectral")
+  scale_colour_brewer(palette = "YlOrRd")
 ```
 
 This plot reinforces the observations from the one above, though there are certainly some interesting outliers.  All of the relationships observed so far also appear to be linear in nature, though the highly discrete nature of the quality scores makes it much more difficult to tell for certain.  Therefore, tranforming axes with other scales (log, square root, etc.) does not seem to be appropriate.
@@ -462,10 +424,14 @@ I was surprised to see that two different agents that are listed as wine preserv
 
 ### Plot 1
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=10}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
 ggplot(data = rwine, aes(x = quality)) +
-  geom_bar(fill = "blue") +
-  ggtitle('Distribution of Wine Quality Scores')
+  geom_bar() +
+  ggtitle('Distribution of Wine Quality Scores') +
+  theme(title=element_text(size = 14),
+        axis.text=element_text(size=10),
+        axis.title=element_text(size=12,face="bold")) +
+  theme_bw()
 ```
 
 ### Description 1
@@ -474,15 +440,25 @@ Wine scores are only awarded in whole numbers, making the data highly discrete. 
 
 ### Plot 2
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=10}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
 plot1 <- ggplot(data = rwine, aes(x = alcohol)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(8, quantile(rwine$alcohol, 0.99)) +
-  ggtitle('Distribution of Alcohol Content')
+  ggtitle('Distribution of Alcohol Content') +
+  xlab("Alchohol (% by volume)") +
+  theme(title=element_text(size = 14),
+        axis.text=element_text(size=10),
+        axis.title=element_text(size=12,face="bold")) +
+  theme_bw()
 plot2 <- ggplot(data = rwine, aes(x = volatile.acidity)) +
-  geom_histogram(bins = 50) +
+  geom_histogram() +
   xlim(0.1, quantile(rwine$volatile.acidity, 0.99)) +
-  ggtitle('Distribution of Volatile Acidity')
+  ggtitle('Distribution of Volatile Acidity') +
+  xlab("Volatile Acidity (g/L)") +
+  theme(title=element_text(size = 14),
+        axis.text=element_text(size=10),
+        axis.title=element_text(size=12,face="bold")) +
+  theme_bw()
 
 grid.arrange(plot1, plot2, ncol = 2)
 ```
@@ -493,12 +469,18 @@ Histograms of the two variables most highly correlated with wine scores.  You ca
 
 ### Plot 3
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=18, fig.height=10}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5}
 ggplot(data = rwine2, aes(x = alcohol, y = quality, 
                           colour = volatile.acidity.bucket)) +
   geom_point(alpha = 0.7, size = 5, position = 'jitter') + 
-  scale_colour_brewer(palette = "Spectral") +
-  ggtitle('Wine Quality vs. Alcohol and Volatile Acidity')
+  scale_colour_brewer(palette = "YlOrRd") +
+  ggtitle('Wine Quality vs. Alcohol and Volatile Acidity') +
+  xlab("Alchohol (% by volume)") +
+  theme(title=element_text(size = 14),
+        axis.text=element_text(size=10),
+        axis.title=element_text(size=12,face="bold"),
+        legend.title=element_text(size=12,face="bold")) +
+  labs(colour = "Volatile Acidity (g/L)")
 ```
 
 ### Description 3
